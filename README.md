@@ -1,38 +1,40 @@
-# Cloud Monitoring and Alerting Stack
+# Cloud Monitoring & Alerting Platform
 
-A complete DevOps/SRE monitoring project built with Docker, Prometheus, Grafana, Alertmanager, Node Exporter, cAdvisor, Bash, PowerShell, and GitHub Actions.
+This project is a monitoring stack built with Prometheus, Grafana, Alertmanager, Node Exporter, and cAdvisor running on Docker Compose.
 
-## What this project demonstrates
+The goal was to learn how application and infrastructure monitoring works in a real environment, including service health checks, metrics collection, alerting, and basic self-healing.
 
-- Containerized deployment using Docker Compose
-- Prometheus service discovery and metric scraping
-- Grafana dashboard provisioning
-- Alert rules for service outage, latency, errors, and container CPU
-- Alertmanager routing to a local webhook receiver
-- Node Exporter host metrics
-- cAdvisor container metrics
-- Self-healing scripts using Bash and PowerShell
-- GitHub Actions CI pipeline
+## What I Built
+
+* Dockerized monitoring environment
+* Prometheus for metrics collection
+* Grafana dashboards for visualization
+* Alertmanager for alert routing
+* Node Exporter for host metrics
+* cAdvisor for container metrics
+* PowerShell and Bash scripts for service recovery
+* GitHub Actions workflow for validation
 
 ## Services
 
-| Service | URL |
-|---|---|
-| Sample App | http://localhost:3000 |
-| Prometheus | http://localhost:9090 |
-| Prometheus Targets | http://localhost:9090/targets |
+| Service      | URL                   |
+| ------------ | --------------------- |
+| Sample App   | http://localhost:3000 |
+| Prometheus   | http://localhost:9090 |
+| Grafana      | http://localhost:3001 |
 | Alertmanager | http://localhost:9093 |
-| Grafana | http://localhost:3001 |
-| cAdvisor | http://localhost:8080 |
-| Alert Webhook Health | http://localhost:5001/health |
+| cAdvisor     | http://localhost:8080 |
 
-Grafana login:
+Grafana Login:
 
 ```text
-admin / admin
+admin
+admin
 ```
 
-## Run locally
+## Running the Project
+
+Start everything:
 
 ```bash
 docker compose up --build -d
@@ -44,53 +46,54 @@ Check containers:
 docker ps
 ```
 
-Stop all services:
+Stop everything:
 
 ```bash
 docker compose down
 ```
 
-## Generate traffic
+## Verify Monitoring
 
-Open the app several times:
-
-```text
-http://localhost:3000
-http://localhost:3000/simulate-latency
-http://localhost:3000/simulate-error
-```
-
-On Windows PowerShell:
-
-```powershell
-./scripts/demo-traffic.ps1
-```
-
-## Failure and recovery test
-
-Stop the app:
-
-```bash
-docker stop sample-monitored-service
-```
-
-Verify the outage:
+Open:
 
 ```text
 http://localhost:9090/targets
 ```
 
-The `sample-node-service` target should become `DOWN`.
+You should see:
 
-Start the app again:
+* prometheus
+* sample-node-service
+* cadvisor
+* node-exporter
+
+all showing UP.
+
+## Failure Test
+
+Stop the application:
+
+```bash
+docker stop sample-monitored-service
+```
+
+Refresh:
+
+```text
+http://localhost:9090/targets
+```
+
+The application target should become DOWN.
+
+Start it again:
 
 ```bash
 docker start sample-monitored-service
 ```
 
-After 30-60 seconds, the target should return to `UP`.
+After a short delay it should return to UP.
 
-## Self-healing scripts
+## Self-Healing
 
 PowerShell:
 
@@ -104,56 +107,39 @@ Bash:
 ./scripts/self-heal.sh
 ```
 
-These scripts check whether `sample-monitored-service` is running. If it is stopped, they restart it.
+The scripts check whether the application container is running and restart it if necessary.
 
-## Alerts
+## Dashboard
 
-Prometheus alert rules are in:
+The Grafana dashboard includes:
 
-```text
-prometheus/rules/app-alerts.yml
-```
+* Service Health
+* Targets Status
+* HTTP Request Rate
+* Application Latency
+* CPU Usage
+* Container Metrics
 
-Included alerts:
-
-- `SampleServiceDown`
-- `HighApplicationLatency`
-- `ApplicationErrorSpike`
-- `HighContainerCPU`
-
-Alertmanager config is in:
+## Project Structure
 
 ```text
-alertmanager/alertmanager.yml
+app/
+prometheus/
+grafana/
+alertmanager/
+scripts/
+docker-compose.yml
+README.md
 ```
 
-The default receiver sends alerts to the local webhook listener. View alert logs:
+## What I Learned
 
-```bash
-docker logs alert-webhook-listener
+* Prometheus scraping and alert rules
+* Grafana dashboard creation
+* Container monitoring with cAdvisor
+* Infrastructure monitoring with Node Exporter
+* Docker Compose orchestration
+* Basic alerting and recovery workflows
+
 ```
-
-## GitHub push
-
-```bash
-git init
-git add .
-git commit -m "Complete cloud monitoring and alerting stack"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/cloud-monitoring-alerting-stack.git
-git push -u origin main
 ```
-
-## Resume bullet
-
-**Cloud Monitoring and Alerting Stack | Docker, Prometheus, Grafana, Alertmanager, PowerShell**
-
-- Built a containerized monitoring and alerting platform using Docker Compose, Prometheus, Grafana, Alertmanager, Node Exporter, and cAdvisor.
-- Implemented service health monitoring, real-time dashboards, outage detection, latency tracking, error-rate monitoring, and container/host metrics.
-- Configured Prometheus alert rules and Alertmanager routing to detect service failures and operational issues.
-- Developed Bash and PowerShell self-healing scripts to restart failed containers and validate recovery workflows.
-- Added GitHub Actions CI to build the stack and verify service health automatically.
-
-## Interview explanation
-
-I built a cloud monitoring and alerting platform using Docker, Prometheus, Grafana, and Alertmanager. The application exposes Prometheus metrics, Prometheus scrapes those metrics, Grafana visualizes service health and performance, and Alertmanager routes alerts when the service goes down or latency/error rate increases. I also tested failure scenarios by stopping the application container, verifying the target went DOWN in Prometheus, and using self-healing scripts to bring the service back online.
