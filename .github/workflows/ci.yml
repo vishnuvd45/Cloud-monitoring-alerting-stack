@@ -1,0 +1,30 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install app dependencies
+        working-directory: app
+        run: npm install
+      - name: Build Docker stack
+        run: docker compose build
+      - name: Start stack
+        run: docker compose up -d
+      - name: Wait for app
+        run: sleep 25
+      - name: Verify app health
+        run: curl -f http://localhost:3000/health
+      - name: Verify Prometheus
+        run: curl -f http://localhost:9090/-/healthy
+      - name: Stop stack
+        if: always()
+        run: docker compose down

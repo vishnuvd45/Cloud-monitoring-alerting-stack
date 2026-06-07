@@ -1,0 +1,35 @@
+groups:
+  - name: app-alerts
+    rules:
+      - alert: SampleServiceDown
+        expr: up{job="sample-node-service"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Sample monitored service is DOWN"
+          description: "Prometheus cannot scrape app:3000 for more than 30 seconds."
+      - alert: HighApplicationLatency
+        expr: histogram_quantile(0.95, rate(app_http_request_duration_seconds_bucket[2m])) > 2
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 application latency"
+          description: "p95 latency is above 2 seconds for more than 1 minute."
+      - alert: ApplicationErrorSpike
+        expr: increase(app_simulated_errors_total[2m]) > 3
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Application error spike detected"
+          description: "More than 3 simulated errors occurred in 2 minutes."
+      - alert: HighContainerCPU
+        expr: sum(rate(container_cpu_usage_seconds_total{name="sample-monitored-service"}[2m])) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on sample service container"
+          description: "Container CPU usage is above threshold."

@@ -1,0 +1,26 @@
+global:
+  resolve_timeout: 1m
+
+route:
+  receiver: webhook-team
+  group_by: ['alertname', 'job']
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 2m
+
+receivers:
+  - name: webhook-team
+    webhook_configs:
+      - url: 'http://alert-webhook:5001/alerts'
+        send_resolved: true
+
+# Optional email receiver. Add real SMTP values before using.
+# receivers:
+#   - name: email-team
+#     email_configs:
+#       - to: your-email@example.com
+#         from: your-email@example.com
+#         smarthost: smtp.gmail.com:587
+#         auth_username: your-email@example.com
+#         auth_password: your-app-password
+#         send_resolved: true
